@@ -1,0 +1,322 @@
+/* ===== Tokens ===== */
+:root{
+  --bg: #12150e;
+  --bg-panel: #191d13;
+  --paper: #e8e2ce;
+  --paper-dim: #d8d1b9;
+  --ink: #201f18;
+  --olive: #565f42;
+  --olive-dim: #3a4030;
+  --stamp: #8f2a1e;
+  --stamp-dim: #7a2419;
+  --signal: #8caa8f;
+  --line: rgba(232,226,206,0.14);
+  --radius: 2px;
+}
+
+*{ box-sizing: border-box; }
+html{ scroll-behavior: smooth; }
+
+body{
+  margin:0;
+  background:
+    radial-gradient(ellipse 120% 80% at 50% -10%, rgba(143,42,30,0.08), transparent 60%),
+    var(--bg);
+  color: var(--paper);
+  font-family: 'PT Sans', sans-serif;
+  min-height:100vh;
+  position: relative;
+  overflow-x:hidden;
+}
+
+.mono{ font-family:'JetBrains Mono', monospace; letter-spacing:0.04em; }
+
+/* ===== Ambient texture ===== */
+.scanlines{
+  position:fixed; inset:0; pointer-events:none; z-index:50;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.025) 0px,
+    rgba(255,255,255,0.025) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  mix-blend-mode: overlay;
+  opacity:0.5;
+}
+.vignette{
+  position:fixed; inset:0; pointer-events:none; z-index:49;
+  box-shadow: inset 0 0 18vw rgba(0,0,0,0.65);
+}
+
+/* ===== Top bar ===== */
+.topbar{
+  display:flex; justify-content:space-between; align-items:center;
+  padding: 18px 28px;
+  font-size:12px;
+  color: var(--signal);
+  border-bottom: 1px solid var(--line);
+  position:relative; z-index:2;
+}
+.topbar .dot{ margin:0 8px; opacity:0.5; }
+
+/* ===== Layout ===== */
+main{
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 56px 28px 40px;
+  position:relative; z-index:2;
+}
+
+.hero{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items:stretch;
+}
+
+/* ===== Pass card (signature element) ===== */
+.pass-card{
+  position:relative;
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: var(--radius);
+  padding: 22px 24px 28px;
+  box-shadow: 0 22px 44px rgba(0,0,0,0.45);
+  overflow:hidden;
+  transform: rotate(-0.6deg);
+}
+.pass-card::before{
+  content:"";
+  position:absolute; inset:8px;
+  border: 1px solid rgba(32,31,24,0.25);
+  pointer-events:none;
+}
+.pass-card__head{
+  display:flex; justify-content:space-between;
+  font-size:11px;
+  color: var(--olive);
+  padding-bottom:12px;
+  border-bottom: 1px dashed rgba(32,31,24,0.3);
+  margin-bottom:18px;
+}
+.pass-card__status{ color: var(--stamp); font-weight:700; }
+
+.pass-card__body{
+  display:flex; gap:20px; align-items:flex-start;
+}
+.pass-photo{
+  width:112px; height:140px;
+  flex: 0 0 auto;
+  background: var(--olive-dim);
+  border: 1px solid rgba(32,31,24,0.35);
+  overflow:hidden;
+  position:relative;
+}
+.pass-photo img{ width:100%; height:100%; object-fit:cover; display:block; }
+.pass-photo--empty img{ display:none; }
+.pass-photo--empty::after{
+  content:"НЕТ ФОТО";
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'JetBrains Mono', monospace;
+  font-size:10px; text-align:center; color: rgba(232,226,206,0.6);
+  padding: 8px;
+}
+
+.pass-title{
+  font-family:'Oswald', sans-serif;
+  font-weight:700;
+  font-size: clamp(28px, 4vw, 40px);
+  line-height:0.98;
+  letter-spacing:0.01em;
+  margin:0 0 10px;
+  text-transform:uppercase;
+}
+.pass-sub{
+  margin:0;
+  font-size:13px;
+  line-height:1.5;
+  color: var(--olive);
+}
+
+/* stamp */
+.stamp{
+  position:absolute;
+  right: 8px; bottom: -6px;
+  width: 132px; height:132px;
+  opacity:0;
+  transform: scale(1.6) rotate(-26deg);
+  animation: stampIn 0.5s 0.5s cubic-bezier(.2,1.3,.4,1) forwards;
+  mix-blend-mode: multiply;
+}
+.stamp svg{ width:100%; height:100%; overflow:visible; }
+.stamp__ring-outer, .stamp__ring-inner{
+  fill:none; stroke: var(--stamp); stroke-width:2.5;
+}
+.stamp__arc-text{
+  fill: var(--stamp);
+  font-family:'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  letter-spacing: 0.12em;
+}
+.stamp__center{
+  fill: var(--stamp);
+  font-family:'Oswald', sans-serif;
+  font-weight:600;
+  font-size: 18px;
+  letter-spacing:0.04em;
+}
+.stamp__center--sm{ font-size:12px; }
+
+@keyframes stampIn{
+  0%{ opacity:0; transform: scale(1.7) rotate(-30deg); }
+  60%{ opacity:1; }
+  100%{ opacity:0.92; transform: scale(1) rotate(-14deg); }
+}
+
+/* ===== Cover panel ===== */
+.cover-panel{
+  display:flex; flex-direction:column; gap:10px;
+}
+.cover-frame{
+  position:relative;
+  flex:1;
+  min-height: 220px;
+  border-radius: var(--radius);
+  overflow:hidden;
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+}
+.cover-frame img{
+  width:100%; height:100%; object-fit:cover; display:block;
+  filter: saturate(0.85) contrast(1.05);
+}
+.cover-frame--empty{
+  background:
+    linear-gradient(135deg, rgba(143,42,30,0.12), transparent 60%),
+    repeating-linear-gradient(45deg, rgba(232,226,206,0.03) 0 2px, transparent 2px 14px),
+    var(--bg-panel);
+}
+.cover-frame--empty img{ display:none; }
+.cover-grid{
+  position:absolute; inset:0;
+  background-image:
+    linear-gradient(rgba(232,226,206,0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(232,226,206,0.08) 1px, transparent 1px);
+  background-size: 13% 20%;
+  pointer-events:none;
+}
+.coord{
+  position:absolute; font-size:11px; color: var(--signal);
+  background: rgba(18,21,14,0.55);
+  padding: 3px 7px;
+}
+.coord--tl{ top:10px; left:10px; }
+.coord--br{ bottom:10px; right:10px; }
+.cover-caption{
+  font-size:11px; color: var(--olive); text-align:right;
+  padding-right:2px;
+}
+
+/* ===== Dossier ===== */
+.dossier{
+  margin-top: 64px;
+  border-top: 1px solid var(--line);
+}
+.dossier__row{
+  display:grid;
+  grid-template-columns: 160px 1fr;
+  gap: 24px;
+  padding: 32px 0;
+  border-bottom: 1px solid var(--line);
+}
+.dossier__label{
+  font-family:'Oswald', sans-serif;
+  font-size:13px;
+  letter-spacing: 0.16em;
+  color: var(--signal);
+  margin:0;
+  font-weight:600;
+}
+.dossier__content p{
+  margin:0;
+  max-width: 60ch;
+  line-height:1.7;
+  color: rgba(232,226,206,0.88);
+  font-size: 15px;
+}
+
+.dossier__content--links{
+  display:flex; flex-direction:column; gap:12px;
+}
+
+/* ===== Access buttons ===== */
+.access-btn{
+  display:flex; align-items:center; gap:16px;
+  text-decoration:none;
+  color: var(--paper);
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+.access-btn:hover{
+  border-color: var(--signal);
+  background: #1d2216;
+  transform: translateX(4px);
+}
+.access-btn:focus-visible{
+  outline: 2px solid var(--signal);
+  outline-offset: 3px;
+}
+.access-btn:active{ transform: translateX(2px) scale(0.995); }
+
+.access-btn__code{
+  font-size:12px; color: var(--olive-dim);
+  background: var(--paper);
+  color: var(--ink);
+  padding: 4px 8px;
+  flex: 0 0 auto;
+}
+.access-btn__text{ display:flex; flex-direction:column; gap:2px; flex:1; }
+.access-btn__text strong{ font-size:16px; font-weight:700; }
+.access-btn__text small{ font-size:12.5px; color: var(--olive); }
+.access-btn--discord .access-btn__code{ background: var(--signal); }
+.access-btn__arrow{
+  font-size:18px; color: var(--olive);
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+.access-btn:hover .access-btn__arrow{ transform: translateX(4px); color: var(--paper); }
+
+/* ===== Footer ===== */
+.footer{
+  text-align:center;
+  padding: 28px 20px 36px;
+  font-size:11px;
+  color: rgba(232,226,206,0.4);
+  position:relative; z-index:2;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 820px){
+  .hero{ grid-template-columns: 1fr; }
+  .cover-frame{ min-height:180px; }
+  .dossier__row{ grid-template-columns: 1fr; gap:10px; }
+}
+@media (max-width: 480px){
+  .topbar{ padding:14px 16px; font-size:11px; }
+  main{ padding: 36px 16px 24px; }
+  .pass-card{ padding:18px 16px 22px; }
+  .pass-card__body{ flex-direction:column; }
+  .pass-photo{ width:100px; height:126px; }
+  .stamp{ width:104px; height:104px; right:4px; bottom:-2px; }
+}
+
+/* ===== Reduced motion ===== */
+@media (prefers-reduced-motion: reduce){
+  .stamp{ animation: none; opacity:0.92; transform: scale(1) rotate(-14deg); }
+  .access-btn{ transition:none; }
+  html{ scroll-behavior:auto; }
+}
